@@ -26,7 +26,7 @@ Install dependencies
 Start the server
 
 ```bash
-  node app.js
+  node index.js
 ```
 
 

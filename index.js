@@ -13,16 +13,19 @@ const db = new sqlite3.Database('database.db');
 
 // Create a table (if not exists)
 db.run(`
-  CREATE TABLE IF NOT EXISTS tasks (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    description TEXT NOT NULL
+  CREATE TABLE IF NOT EXISTS task (
+    task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_name TEXT NOT NULL,
+    task_description VARCHAR(255),
+    task_status VARCHAR(255),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
   )
 `);
 
 // Get all tasks
 app.get('/tasks', (req, res) => {
-  db.all('SELECT * FROM tasks', (err, rows) => {
+  db.all('SELECT * FROM task', (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
     } else {
@@ -32,10 +35,10 @@ app.get('/tasks', (req, res) => {
 });
 
 // Create task
-app.post('/tasks', (req, res) => {
-  const { name, description } = req.body;
+app.post('/create', (req, res) => {
+  const { task_name, task_description, task_status } = req.body;
 
-  db.run('INSERT INTO tasks (name, description) VALUES (?, ?)', [name, description], function(err) {
+  db.run('INSERT INTO task (task_name, task_description, task_status) VALUES (?, ?, ?)', [task_name, task_description, task_status], function(err) {
     if (err) {
       res.status(500).json({ error: err.message });
     } else {
@@ -45,11 +48,11 @@ app.post('/tasks', (req, res) => {
 })
 
 // Update task
-app.put('/tasks/:id', (req, res) => {
+app.put('/update/:id', (req, res) => {
   const { id } = req.params;
-  const { name, description } = req.body;
+  const { task_name, task_description, task_status } = req.body;
 
-  db.run('UPDATE tasks SET name = ?, description = ? WHERE id = ?', [name, description, id], function(err) {
+  db.run('UPDATE task SET task_name = ?, task_description = ?, task_status = ? WHERE task_id = ?', [task_name, task_description, task_status, id], function(err) {
     if (err) {
       res.status(500).json({ error: err.message });
     } else if (this.changes === 0) {
@@ -61,10 +64,10 @@ app.put('/tasks/:id', (req, res) => {
 })
 
 // Delete task
-app.delete('/tasks/:id', (req, res) => {
+app.delete('/delete/:id', (req, res) => {
   const { id } = req.params;
 
-  db.run('DELETE FROM tasks WHERE id = ?', id, function(err) {
+  db.run('DELETE FROM task WHERE task_id = ?', id, function(err) {
     if (err) {
       res.status(500).json({ error: err.message });
     } else if (this.changes === 0) {
